@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/OyunBitti.unity
     guid: 40ad81c0a6297eb49ad27d50f87f4419
+  - enabled: 1
+    path: "Assets/Scenes/OyunuKazand\u0131.unity"
+    guid: 05e7fefb8e569594d865bfe04f253996
   m_configObjects: {}
