@@ -4,10 +4,10 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - zombi
-  - mermi
-  - kalp
   - task
+  - zombie
+  - bullet
+  - hearth
   layers:
   - Default
   - TransparentFX

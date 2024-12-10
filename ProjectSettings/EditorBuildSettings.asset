@@ -6,12 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/KillZombie/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
-    path: Assets/Scenes/OyunBitti.unity
+    path: Assets/KillZombie/Scenes/GameLost.unity
     guid: 40ad81c0a6297eb49ad27d50f87f4419
   - enabled: 1
-    path: "Assets/Scenes/OyunuKazand\u0131.unity"
+    path: Assets/KillZombie/Scenes/GameWon.unity
     guid: 05e7fefb8e569594d865bfe04f253996
   m_configObjects: {}
