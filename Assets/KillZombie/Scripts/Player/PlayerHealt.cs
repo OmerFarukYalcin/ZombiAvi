@@ -1,40 +1,57 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerHealt : MonoBehaviour
 {
-    private float healt = 100f;
+    private const float MaxHealth = 100f; // Maximum player health
+    private float health = MaxHealth;    // Player's current health
 
-    public void TakeDamage(float _amount, Image _healtImage)
+    /// <summary>
+    /// Reduces the player's health by a specified amount and updates the UI.
+    /// </summary>
+    public void TakeDamage(float amount, Image healthImage)
     {
-        GetComponent<PlayerController>().playHurtSound();
-        healt -= _amount;
-        float x = healt / 100f;
-        _healtImage.fillAmount = x;
-        _healtImage.color = Color.Lerp(Color.red, Color.green, x);
+        BGMUSIC.instance.PlaySfx("hit");
 
-        if (healt <= 0)
+        health -= amount;
+        health = Mathf.Clamp(health, 0, MaxHealth); // Ensure health doesn't go below 0
+        UpdateHealthBar(healthImage);
+
+        if (health <= 0)
         {
-           Die();
+            Die();
         }
     }
 
-    public void IncreaseHealt(float _amount, Image _healtImage,GameObject go)
+    /// <summary>
+    /// Increases the player's health by a specified amount and updates the UI.
+    /// </summary>
+    public void IncreaseHealt(float amount, Image healthImage, GameObject pickup)
     {
-        GetComponent<PlayerController>().playTakingHeartSound();
-        if (healt < 100f)
-            healt += _amount;
-        float x = healt / 100f;
-        _healtImage.fillAmount = x;
-        _healtImage.color = Color.Lerp(Color.red, Color.green, x);
-        Destroy(go);
+        BGMUSIC.instance.PlaySfx("takeHealt");
+
+        health = Mathf.Min(health + amount, MaxHealth); // Increase health without exceeding MaxHealth
+        UpdateHealthBar(healthImage);
+
+        Destroy(pickup); // Destroy the health pickup object
     }
 
-    void Die()
+    /// <summary>
+    /// Updates the health bar's fill amount and color based on the current health.
+    /// </summary>
+    private void UpdateHealthBar(Image healthImage)
     {
-        GetComponent<PlayerController>().playDieSound();
-        GetComponent<PlayerController>().gControl.GameOver();
+        float healthRatio = health / MaxHealth;
+        healthImage.fillAmount = healthRatio;
+        healthImage.color = Color.Lerp(Color.red, Color.green, healthRatio);
+    }
+
+    /// <summary>
+    /// Handles the player's death logic.
+    /// </summary>
+    private void Die()
+    {
+        BGMUSIC.instance.PlaySfx("death");
+        GameControl.instance.GameOver();
     }
 }

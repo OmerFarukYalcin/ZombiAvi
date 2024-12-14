@@ -3,84 +3,89 @@ using UnityEngine.AI;
 
 public class ZombieController : MonoBehaviour
 {
-    public float damage = 1f;
+    [SerializeField] private float damage = 1f; // Damage dealt by the zombie
+    [SerializeField] private float detectionRange = 10f; // Range at which the zombie detects the player
 
-    Target target;
-    //Gameobjects
-    private GameObject player;
-    //public GameObject heart;
+    private Target target; // Reference to the zombie's Target component
+    private GameObject player; // Reference to the player object
+    private float distance; // Current distance between the zombie and the player
+    private AudioSource audioSource; // AudioSource component for zombie sounds
+    private NavMeshAgent navMeshAgent; // NavMeshAgent component for movement
 
-    //numeric variables
-    //private int zombieHealt = 3;
-    //private int zombiePoint = 10;
-    private float distance;
-    
-    //c# script
-   // private GameControl gControl;
-    
-    //Audio
-    private AudioSource aSource;
-    
-    //boolean
-   // private bool zombieDeath=false;
     void Start()
     {
+        // Initialize references to required components
         target = GetComponent<Target>();
-        aSource = GetComponent<AudioSource>();
-        player = GameObject.Find("FPSController");     
+        audioSource = GetComponent<AudioSource>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
+
+        // Find the player GameObject by name
+        player = GameObject.Find("FPSController");
     }
 
     void Update()
     {
+        if (target == null || navMeshAgent == null || player == null) return;
+
+        // Update the zombie's navigation and behavior based on its state
         if (!target.IsDeath())
         {
-            GetComponent<NavMeshAgent>().destination = player.transform.position;
+            // If the zombie is alive, move towards the player
+            navMeshAgent.destination = player.transform.position;
         }
         else
         {
-            GetComponent<NavMeshAgent>().destination = gameObject.transform.position;
+            // If the zombie is dead, stop moving and freeze rotation
+            navMeshAgent.destination = transform.position;
             GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationY;
-            print("aaaaa:" + GetComponent<Rigidbody>().constraints);
         }
 
-        distance = Vector3.Distance(transform.position,player.transform.position);
-        if(distance < 10f)
-        {
-            if (!aSource.isPlaying)
-                aSource.Play();
-            if(!target.IsDeath())
-            GetComponentInChildren<Animation>().Play("Zombie_Attack_01");
-        }
-        else
-            if(aSource.isPlaying)
-            aSource.Stop();
+        // Calculate the distance between the zombie and the player
+        distance = Vector3.Distance(transform.position, player.transform.position);
+
+        // Play attack animation and sound if within range
+        HandleZombieBehavior();
     }
 
-    private void OnCollisionEnter(Collision c)
+    private void HandleZombieBehavior()
     {
-        if (c.gameObject.tag.Equals("mermi"))
+        if (distance < detectionRange)
         {
-            Destroy(c.gameObject);
-            GetComponent<Target>().TakeDamage(damage);
-            
+            // Play zombie sound if not already playing
+            if (!audioSource.isPlaying)
+                audioSource.Play();
+
+            // Play attack animation if zombie is alive
+            if (!target.IsDeath())
+                GetComponentInChildren<Animation>().Play("Zombie_Attack_01");
+        }
+        else
+        {
+            // Stop zombie sound if out of range
+            if (audioSource.isPlaying)
+                audioSource.Stop();
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Handle collision with bullets
+        if (collision.gameObject.CompareTag("bullet"))
+        {
+            Destroy(collision.gameObject);
+            if (target != null)
+            {
+                target.TakeDamage(damage);
+            }
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag.Equals("mermi"))
+        // Handle trigger collisions with bullets
+        if (other.gameObject.CompareTag("bullet"))
         {
             Destroy(other.gameObject);
-            //Debug.Log("Carpisma Gerceklesti");
-            //zombieHealt--;
-            //if (zombieHealt == 0)
-            //{
-            //    zombieDeath = true;
-            //    gControl.IncreasePoint(zombiePoint);
-            //    Instantiate(heart, new Vector3(transform.position.x,transform.position.y+2f,transform.position.z), Quaternion.identity);
-            //    GetComponentInChildren<Animation>().Play("Zombie_Death_01");
-            //    Destroy(this.gameObject, 1.667f);
-            //}
         }
     }
 }

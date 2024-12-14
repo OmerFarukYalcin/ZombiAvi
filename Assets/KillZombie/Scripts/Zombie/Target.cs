@@ -1,44 +1,70 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Target : MonoBehaviour
 {
-    public GameObject heart;
+    [SerializeField] private GameObject heart; // Prefab to instantiate upon zombie's death
+    [SerializeField] private int zombiePoint = 10; // Points awarded for killing the zombie
+    [SerializeField] private float initialHealth = 3f; // Zombie's initial health
+    [SerializeField] private float destroyDelay = 1.667f; // Delay before destroying the zombie object
 
-    //c# script
-    private GameControl gControl;
+    private float health; // Current health of the zombie
+    private bool zombieDeath = false; // Tracks if the zombie is dead
 
-    //numeric variables
-    private int zombiePoint = 10;
-
-    public float healt = 3f;
-
-    //boolean
-    private bool zombieDeath = false;
-    public void TakeDamage(float _damage)
+    private void Start()
     {
-        gControl = GameObject.Find("_Scripts").GetComponent<GameControl>();
-        healt-= _damage;
-        if (healt <= 0)
+        // Initialize health
+        health = initialHealth;
+    }
+
+    /// <summary>
+    /// Reduces the zombie's health by a specified damage amount.
+    /// </summary>
+    /// <param name="damage">The amount of damage to apply.</param>
+    public void TakeDamage(float damage)
+    {
+        health -= damage;
+
+        // Trigger death logic if health falls to 0 or below
+        if (health <= 0)
         {
             Die();
         }
     }
 
-    public bool IsDeath() 
+    /// <summary>
+    /// Checks if the zombie is dead.
+    /// </summary>
+    /// <returns>True if the zombie is dead, otherwise false.</returns>
+    public bool IsDeath()
     {
         return zombieDeath;
     }
 
-    void Die()
+    /// <summary>
+    /// Handles the zombie's death sequence.
+    /// </summary>
+    private void Die()
     {
-        GetComponent<CapsuleCollider>().enabled= false;
+        // Disable the collider to prevent further interactions
+        GetComponent<CapsuleCollider>().enabled = false;
+
+        // Mark the zombie as dead
         zombieDeath = true;
-        gControl.IncreasePoint(zombiePoint);
-        Instantiate(heart, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
-        GetComponentInChildren<Animation>().Play("Zombie_Death_01");
-        Destroy(this.gameObject, 1.667f);
+
+        // Increase the player's score
+        GameControl.instance.IncreasePoint(zombiePoint);
+
+        // Instantiate the heart prefab at the zombie's position
+        Instantiate(heart, transform.position, Quaternion.identity);
+
+        // Play the zombie death animation, if available
+        var animation = GetComponentInChildren<Animation>();
+        if (animation != null)
+        {
+            animation.Play("Zombie_Death_01");
+        }
+
+        // Destroy the zombie GameObject after the animation duration
+        Destroy(this.gameObject, destroyDelay);
     }
 }

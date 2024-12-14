@@ -3,60 +3,43 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public AudioClip[] sounds; 
-    
-    public GameControl gControl;
-    public Image healtImage;
-    
-    private float healtAmount = 5f;
-    
-    private AudioSource aSourse;
+    public Image healtImage; // UI image to display health
+    private PlayerHealt playerHealt; // Cached reference to PlayerHealt component
 
-    void Start()
-    {
-        aSourse = GetComponent<AudioSource>();
-    }
+    [SerializeField] private float healtAmount = 5f; // Health change amount
+    [SerializeField] private float waterDamageAmount = 100f; // Damage amount for water hazard
 
-    public void playShootSound()
+    private void Start()
     {
-        aSourse.PlayOneShot(sounds[0], 1f);
-    }
-
-    public void playHurtSound()
-    {
-        aSourse.PlayOneShot(sounds[3], 1f);
-    }
-
-    public void playTakingHeartSound()
-    {
-        aSourse.PlayOneShot(sounds[2], 1f);
-    }
-
-    public void playDieSound()
-    {
-        aSourse.PlayOneShot(sounds[1], 1f);
+        // Cache the PlayerHealt component
+        playerHealt = GetComponent<PlayerHealt>();
     }
 
     private void OnCollisionEnter(Collision c)
     {
-        if (c.collider.gameObject.tag.Equals("zombi"))
+        if (c.collider.gameObject.CompareTag("zombie"))
         {
-            GetComponent<PlayerHealt>().TakeDamage(healtAmount, healtImage);
+            // Reduce health when colliding with a zombie
+            playerHealt.TakeDamage(healtAmount, healtImage);
         }
     }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag.Equals("kalp"))
+        if (other.gameObject.CompareTag("hearth"))
         {
-            GetComponent<PlayerHealt>().IncreaseHealt(healtAmount, healtImage, other.gameObject);
+            // Increase health when collecting a health item
+            playerHealt.IncreaseHealt(healtAmount, healtImage, other.gameObject);
         }
-        if(other.gameObject.name.Equals("WaterProDaytime"))
+        else if (other.gameObject.name.Equals("WaterProDaytime"))
         {
-            GetComponent<PlayerHealt>().TakeDamage(100, healtImage);
+            // Apply water hazard damage
+            playerHealt.TakeDamage(waterDamageAmount, healtImage);
         }
-        if (other.gameObject.tag.Equals("Finish"))
+        else if (other.gameObject.CompareTag("Finish"))
         {
-            gControl.GameComplete();
+            // Trigger game completion
+            GameControl.instance.GameComplete();
         }
     }
 }
